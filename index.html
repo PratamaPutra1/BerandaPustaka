@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Beranda Pustaka — Festival Seni Bali Jani VIII</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600;8..60,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink-900:#0B1B2B;
+    --ink-800:#122A40;
+    --navy-700:#1C3A57;
+    --navy-500:#2C5170;
+    --paper:#F4F1E9;
+    --paper-2:#ECE7DA;
+    --brass:#A6843F;
+    --brass-soft:#C7AE7C;
+    --line:#D8D2C0;
+  }
+  html{scroll-behavior:smooth;}
+  body{ background:var(--paper); color:var(--ink-900); font-family:'Inter', sans-serif; }
+  .font-serif-display{font-family:'Source Serif 4', serif;}
+  .font-mono{font-family:'IBM Plex Mono', monospace;}
+  .bg-ink{background:var(--ink-900);}
+  .bg-navy{background:var(--navy-700);}
+  .text-brass{color:var(--brass);}
+
+  .catalog-card{
+    background:var(--paper);
+    border:1px solid var(--line);
+    box-shadow: 0 1px 0 rgba(11,27,43,0.04), 0 8px 20px -12px rgba(11,27,43,0.25);
+    position:relative;
+  }
+  .catalog-card::before{
+    content:"";
+    position:absolute; top:0; left:28px;
+    width:1px; height:100%;
+    background:var(--line);
+  }
+  .catalog-card .hole{
+    position:absolute; left:18px; top:18px;
+    width:8px; height:8px; border-radius:50%;
+    background:var(--paper);
+    border:1px solid var(--line);
+    box-shadow: 0 0 0 1px var(--paper-2) inset;
+  }
+  .catalog-card .hole.bottom{ top:auto; bottom:18px; }
+  .catalog-card.compact::before{ left:14px; }
+  .catalog-card.compact .hole{ left:8px; width:6px; height:6px; }
+
+  .stamp{
+    font-family:'IBM Plex Mono', monospace;
+    border:1.5px solid var(--navy-700);
+    color:var(--navy-700);
+    transform:rotate(-2deg);
+  }
+
+  .due-row{ border-bottom:1px dashed var(--line); }
+  .due-row:last-child{ border-bottom:none; }
+
+  .nav-link{ position:relative; padding-bottom:4px; cursor:pointer; }
+  .nav-link::after{
+    content:""; position:absolute; left:0; bottom:0;
+    width:0; height:1px; background:var(--brass-soft);
+    transition:width .25s ease;
+  }
+  .nav-link:hover::after{ width:100%; }
+  .nav-link.active{ font-weight:600; color:var(--navy-700); }
+  .nav-link.active::after{ width:100%; background:var(--navy-700); }
+
+  .spine{
+    background: repeating-linear-gradient(90deg, var(--navy-700) 0px, var(--navy-700) 2px, var(--navy-500) 2px, var(--navy-500) 4px);
+  }
+
+  .page{ display:none; opacity:0; transform:translateY(6px); transition:opacity .35s ease, transform .35s ease; }
+  .page.active{ display:block; }
+  .page.show{ opacity:1; transform:translateY(0); }
+
+  @media (prefers-reduced-motion: reduce){
+    html{scroll-behavior:auto;}
+    .page{ transition:none; }
+  }
+  .focus-ring:focus-visible{ outline:2px solid var(--brass); outline-offset:3px; }
+
+  /* Konstelasi: motif titik & garis terinspirasi poster Atma Kerthi */
+  .constellation{
+    position:absolute; inset:0; overflow:hidden; pointer-events:none;
+  }
+  .constellation svg{ position:absolute; width:100%; height:100%; }
+  .constellation circle{ fill:var(--brass-soft); }
+  .constellation line, .constellation path{ stroke:var(--brass-soft); stroke-width:0.6; fill:none; opacity:0.35; }
+  .constellation .dot-core{ fill:var(--brass); }
+
+  .ink-header{ position:relative; overflow:hidden; }
+
+  .eyebrow-dot::before{
+    content:""; display:inline-block; width:5px; height:5px; border-radius:50%;
+    background:var(--brass); margin-right:8px; vertical-align:middle;
+    box-shadow:0 0 0 3px rgba(166,132,63,0.18);
+  }
+
+  /* Baris jadwal & rangkaian acara: font normal, lebih mudah dibaca di HP */
+  .agenda-row .agenda-label{
+    font-family:'Inter', sans-serif;
+    font-weight:600;
+    color:var(--navy-700);
+  }
+  .agenda-row .agenda-desc{
+    font-family:'Inter', sans-serif;
+    color:var(--ink-800);
+    line-height:1.55;
+  }
+
+  /* Penyesuaian agar nyaman di layar kecil */
+  @media (max-width: 640px){
+    .catalog-card{ padding-left:1.5rem; }
+    .catalog-card .hole{ left:10px; width:6px; height:6px; }
+    .catalog-card::before{ left:18px; }
+  }
+</style>
+</head>
+<body class="antialiased overflow-x-hidden">
+
+<!-- NAVBAR -->
+<header class="sticky top-0 z-50 bg-paper/95 backdrop-blur border-b" style="border-color:var(--line);">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-14 sm:h-16 flex items-center justify-between">
+   <a href="#" data-page="beranda" class="page-link flex items-center gap-2 sm:gap-3 focus-ring">
+  <span class="w-12 h-12 sm:w-20 sm:h-20 flex items-center justify-center text-paper overflow-hidden rounded-sm shrink-0">
+    <img src="logobp.png" alt="Logo Beranda Pustaka" class="w-full h-full object-contain p-1">
+  </span>
+</a>
+<nav class="hidden md:flex items-center gap-7 text-sm font-medium" style="color:var(--navy-700)">
+  <a href="#" data-page="beranda" class="nav-link page-link focus-ring">Beranda</a>
+  <a href="#" data-page="tentang" class="nav-link page-link focus-ring">Tentang</a>
+  <a href="#" data-page="jadwal" class="nav-link page-link focus-ring">Jadwal</a>
+  <a href="#" data-page="blog" class="nav-link page-link focus-ring">Kabar &amp; Blog</a>
+  <a href="#" data-page="TentangAghumi" class="nav-link page-link focus-ring">Tentang Aghumi</a>
+  <a href="#" data-page="lokasi" class="nav-link page-link focus-ring">Lokasi</a>
+</nav>
+<button id="menuBtn" class="md:hidden focus-ring p-2 -mr-2" aria-label="Buka menu" aria-expanded="false">
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M3 6h18M3 12h18M3 18h18" stroke="#122A40" stroke-width="1.8" stroke-linecap="round"/></svg>
+</button>
+  </div>
+  <nav id="mobileNav" class="hidden md:hidden flex-col px-4 sm:px-6 pb-4 gap-1 text-[15px] font-medium border-t" style="color:var(--navy-700); border-color:var(--line);">
+    <a href="#" data-page="beranda" class="page-link focus-ring py-2.5 border-b" style="border-color:var(--line)">Beranda</a>
+    <a href="#" data-page="tentang" class="page-link focus-ring py-2.5 border-b" style="border-color:var(--line)">Tentang</a>
+    <a href="#" data-page="jadwal" class="page-link focus-ring py-2.5 border-b" style="border-color:var(--line)">Jadwal</a>
+    <a href="#" data-page="blog" class="page-link focus-ring py-2.5 border-b" style="border-color:var(--line)">Kabar &amp; Blog</a>
+    <a href="#" data-page="TentangAghumi" class="page-link focus-ring py-2.5 border-b" style="border-color:var(--line)">Tentang Aghumi</a>
+    <a href="#" data-page="lokasi" class="page-link focus-ring py-2.5">Lokasi</a>
+  </nav>
+</header>
+
+<main>
+
+<!-- PAGE: BERANDA -->
+<section data-name="beranda" class="page active">
+  <div class="relative overflow-hidden bg-ink text-paper ink-header">
+    <div class="constellation" aria-hidden="true">
+      <svg viewBox="0 0 1200 500" preserveAspectRatio="xMidYMid slice">
+        <line x1="980" y1="60" x2="1110" y2="130"></line>
+        <line x1="1110" y1="130" x2="1080" y2="260"></line>
+        <line x1="1080" y1="260" x2="940" y2="290"></line>
+        <line x1="940" y1="290" x2="980" y2="60"></line>
+        <line x1="1110" y1="130" x2="1170" y2="40"></line>
+        <line x1="60" y1="380" x2="170" y2="420"></line>
+        <line x1="170" y1="420" x2="230" y2="330"></line>
+        <line x1="230" y1="330" x2="120" y2="280"></line>
+        <line x1="120" y1="280" x2="60" y2="380"></line>
+        <circle class="dot-core" cx="980" cy="60" r="3.5"></circle>
+        <circle cx="1110" cy="130" r="2.5"></circle>
+        <circle cx="1080" cy="260" r="2"></circle>
+        <circle class="dot-core" cx="940" cy="290" r="3"></circle>
+        <circle cx="1170" cy="40" r="2"></circle>
+        <circle class="dot-core" cx="60" cy="380" r="3"></circle>
+        <circle cx="170" cy="420" r="2.5"></circle>
+        <circle cx="230" cy="330" r="2"></circle>
+        <circle cx="120" cy="280" r="2"></circle>
+      </svg>
+    </div>
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-14 sm:py-20 lg:py-28 relative">
+      <div class="grid lg:grid-cols-12 gap-10 items-center">
+
+  <!-- KONTEN KIRI -->
+  <div class="lg:col-span-7">
+    <p class="font-mono text-[11px] sm:text-xs tracking-[0.2em] sm:tracking-[0.25em] uppercase text-brass mb-5 sm:mb-6 eyebrow-dot">
+      PKB XLVIII 2026 &middot;  Festival Seni Bali Jani VIII
+    </p>
+
+    <h1 class="font-serif-display text-3xl sm:text-4xl lg:text-6xl leading-[1.15] sm:leading-[1.1] mb-6 sm:mb-7">
+      <span class="italic" style="color:var(--brass-soft);">
+        Beranda Pustaka
+      </span>,
+      <br>
+      <span style="color:var(--brass-soft)">ruang temu buku dan&nbsp;budaya.</span>
+    </h1>
+
+    <p class="text-[15px] sm:text-lg max-w-xl leading-relaxed" style="color:var(--brass-soft)">
+      Program literasi yang menjadikan perpustakaan sebagai ruang publik
+      yang kreatif, inklusif, dan partisipatif melalui pameran buku, diskusi,
+      peluncuran buku, dan kolaborasi komunitas literasi.
+    </p>
+
+  </div>
+      </div>
+    </div>
+    <div class="spine h-2 w-full"></div>
+  </div>
+
+  <!-- statistik singkat -->
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 pb-4">
+    <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 sm:gap-5">
+      <div class="border-l-2 pl-4 py-2" style="border-color:var(--navy-700)">
+        <p class="font-serif-display text-xl sm:text-2xl" style="color:var(--ink-900)">13 Jun – 25 Jul</p>
+        <p class="text-xs sm:text-sm" style="color:var(--navy-700)">Berlangsung 2026</p>
+      </div>
+      <div class="border-l-2 pl-4 py-2" style="border-color:var(--navy-700)">
+        <p class="font-serif-display text-xl sm:text-2xl" style="color:var(--ink-900)">6</p>
+        <p class="text-xs sm:text-sm" style="color:var(--navy-700)">Ragam rangkaian acara</p>
+      </div>
+      <div class="border-l-2 pl-4 py-2 col-span-2 sm:col-span-1" style="border-color:var(--navy-700)">
+        <p class="font-serif-display text-xl sm:text-2xl" style="color:var(--ink-900)">Gratis</p>
+        <p class="text-xs sm:text-sm" style="color:var(--navy-700)">Terbuka untuk semua usia</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- tentang singkat -->
+  <div class="bg-paper-2 py-12 sm:py-16 lg:py-20 mt-8" style="background:var(--paper-2)">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 grid lg:grid-cols-12 gap-8 lg:gap-12">
+      <div class="lg:col-span-4">
+        <p class="font-mono text-[11px] sm:text-xs tracking-[0.2em] sm:tracking-[0.25em] uppercase text-brass mb-3 sm:mb-4 eyebrow-dot">Tentang Kami</p>
+        <h2 class="font-serif-display text-xl sm:text-2xl lg:text-3xl leading-tight" style="color:var(--ink-900)">Diampu oleh Komunitas Aghumi</h2>
+      </div>
+      <div class="lg:col-span-8 space-y-4 text-[15px] leading-relaxed" style="color:var(--ink-800)">
+        <p>
+          Beranda Pustaka diselenggarakan oleh Dinas Kebudayaan Provinsi Bali bersama Komunitas Aghumi sebagai pengampu program, menghadirkan kembali perpustakaan sebagai ruang publik yang kreatif, inklusif, dan partisipatif lewat semangat Atma Kerthi.
+        </p>
+        <button data-page="tentang" class="page-link inline-block text-sm font-semibold focus-ring" style="color:var(--navy-700)">Selengkapnya tentang kami →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- agenda mendatang -->
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20">
+    <div class="flex flex-wrap items-end justify-between gap-3 sm:gap-4 mb-6 sm:mb-8">
+      <h2 class="font-serif-display text-xl sm:text-2xl lg:text-3xl" style="color:var(--ink-900)">Rangkaian acara</h2>
+      <button data-page="jadwal" class="page-link text-sm font-semibold focus-ring whitespace-nowrap" style="color:var(--navy-700)">Lihat jadwal lengkap →</button>
+    </div>
+    <div class="catalog-card p-5 sm:p-6 pl-7 sm:pl-9">
+      <div class="hole"></div><div class="hole bottom"></div>
+      <div class="space-y-0">
+        <div class="due-row agenda-row grid grid-cols-1 sm:grid-cols-12 py-3 gap-1 sm:gap-2">
+          <span class="sm:col-span-4 agenda-label text-[15px] sm:text-sm">Pameran Buku</span>
+          <span class="sm:col-span-8 agenda-desc text-[15px] sm:text-sm">Menghadirkan penerbit, penulis, pembaca, dan pelaku literasi.</span>
+        </div>
+        <div class="due-row agenda-row grid grid-cols-1 sm:grid-cols-12 py-3 gap-1 sm:gap-2">
+          <span class="sm:col-span-4 agenda-label text-[15px] sm:text-sm">Diskusi Bersama Penulis</span>
+          <span class="sm:col-span-8 agenda-desc text-[15px] sm:text-sm">Membahas proses kreatif &amp; pengalaman menulis karya.</span>
+        </div>
+        <div class="due-row agenda-row grid grid-cols-1 sm:grid-cols-12 py-3 gap-1 sm:gap-2">
+          <span class="sm:col-span-4 agenda-label text-[15px] sm:text-sm">Peluncuran Buku</span>
+          <span class="sm:col-span-8 agenda-desc text-[15px] sm:text-sm">Perayaan karya sekaligus ruang dialog antar penulis &amp; pegiat literasi.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- kabar terbaru -->
+  <div class="bg-paper-2 py-12 sm:py-16 lg:py-20" style="background:var(--paper-2)">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex flex-wrap items-end justify-between gap-3 sm:gap-4 mb-6 sm:mb-8">
+        <h2 class="font-serif-display text-xl sm:text-2xl lg:text-3xl" style="color:var(--ink-900)">Kabar terbaru</h2>
+        <button data-page="blog" class="page-link text-sm font-semibold focus-ring whitespace-nowrap" style="color:var(--navy-700)">Lihat semua blog →</button>
+      </div>
+      <div class="grid sm:grid-cols-2 md:grid-cols-3 gap-5 sm:gap-6">
+        <article class="catalog-card p-5 pl-7 sm:pl-8 flex flex-col">
+          <div class="hole"></div><div class="hole bottom"></div>
+          <p class="font-mono text-[11px] tracking-widest uppercase mb-2" style="color:var(--navy-700)">13 Jun 2026</p>
+          <h3 class="font-serif-display text-lg mb-1" style="color:var(--ink-900)">Beranda Pustaka Resmi Dibuka</h3>
+          <p class="text-sm leading-relaxed flex-1" style="color:var(--ink-800)">Pameran buku dan aktivasi ruang perpustakaan mulai menyapa pengunjung.</p>
+        </article>
+        <article class="catalog-card p-5 pl-7 sm:pl-8 flex flex-col">
+          <div class="hole"></div><div class="hole bottom"></div>
+          <p class="font-mono text-[11px] tracking-widest uppercase mb-2" style="color:var(--navy-700)">Agenda · Diskusi</p>
+          <h3 class="font-serif-display text-lg mb-1" style="color:var(--ink-900)">Diskusi Bersama Penulis</h3>
+          <p class="text-sm leading-relaxed flex-1" style="color:var(--ink-800)">Berbagi proses kreatif dari ide hingga naskah jadi.</p>
+        </article>
+        <article class="catalog-card p-5 pl-7 sm:pl-8 flex flex-col sm:col-span-2 md:col-span-1">
+          <div class="hole"></div><div class="hole bottom"></div>
+          <p class="font-mono text-[11px] tracking-widest uppercase mb-2" style="color:var(--navy-700)">Agenda · Peluncuran</p>
+          <h3 class="font-serif-display text-lg mb-1" style="color:var(--ink-900)">Peluncuran Buku</h3>
+          <p class="text-sm leading-relaxed flex-1" style="color:var(--ink-800)">Ruang temu penulis, penerbit, dan pegiat literasi.</p>
+        </article>
+      </div>
+    </div>
+  </div>
+  </section>
+
+<!-- PAGE: TENTANG -->
+<section data-name="tentang" class="page">
+  <div class="bg-ink text-paper py-14 sm:py-16 lg:py-20 ink-header">
+    <div class="constellation" aria-hidden="true">
+      <svg viewBox="0 0 1200 300" preserveAspectRatio="xMidYMid slice">
+        <line x1="1000" y1="40" x2="1110" y2="100"></line>
+        <line x1="1110" y1="100" x2="1070" y2="200"></line>
+        <line x1="1070" y1="200" x2="960" y2="220"></line>
+        <line x1="960" y1="220" x2="1000" y2="40"></line>
+        <circle class="dot-core" cx="1000" cy="40" r="3"></circle>
+        <circle cx="1110" cy="100" r="2.2"></circle>
+        <circle cx="1070" cy="200" r="2"></circle>
+        <circle class="dot-core" cx="960" cy="220" r="2.6"></circle>
+      </svg>
+    </div>
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <p class="font-mono text-[11px] sm:text-xs tracking-[0.2em] sm:tracking-[0.25em] uppercase text-brass mb-3 sm:mb-4 eyebrow-dot">Tentang Kami</p>
+      <h1 class="font-serif-display text-2xl sm:text-3xl lg:text-5xl mb-4" style="color:var(--brass-soft);">Apa itu Beranda Pustaka?</h1>
+      <p class="max-w-2xl text-[15px] sm:text-base" style="color:var(--brass-soft)">Program literasi bagian dari Pesta Kesenian Bali XLVIII dan Festival Seni Bali Jani VIII.</p>
+    </div>
+    <div class="spine h-2 w-full mt-10 sm:mt-12"></div>
+  </div>
+
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20">
+    <div class="grid lg:grid-cols-12 gap-10 lg:gap-12">
+      <div class="lg:col-span-8 space-y-5 text-[15px] leading-relaxed" style="color:var(--ink-800)">
+        <p>
+          Beranda Pustaka adalah program literasi yang diselenggarakan oleh Dinas Kebudayaan Provinsi Bali sebagai bagian dari rangkaian Pesta Kesenian Bali XLVIII dan Festival Seni Bali Jani VIII, dengan semangat Atma Kerthi. Program ini hadir untuk memperluas akses literasi sekaligus mengaktivasi perpustakaan sebagai ruang publik yang kreatif, inklusif, dan partisipatif.
+        </p>
+        <p>
+          Dalam pelaksanaannya, Dinas Kebudayaan Provinsi Bali berkolaborasi dengan Komunitas Aghumi sebagai koordinator program yang menjembatani keterlibatan penerbit, penulis, komunitas literasi, dan masyarakat luas. Buku tidak hanya ditampilkan sebagai objek baca, tetapi juga sebagai medium dialog, pembelajaran, dan titik temu antara pengetahuan, seni, dan kebudayaan.
+        </p>
+        <p>
+          Melalui pameran buku, diskusi, lokakarya, peluncuran buku, hingga pertunjukan, Beranda Pustaka membuka ruang dialog antargenerasi dan lintas disiplin.
+        </p>
+        <div class="grid grid-cols-3 gap-3 sm:gap-5 pt-4">
+          <div class="border-l-2 pl-3 sm:pl-4" style="border-color:var(--navy-700)">
+            <p class="font-serif-display text-lg sm:text-2xl" style="color:var(--ink-900)">13 Jun</p>
+            <p class="text-xs sm:text-sm" style="color:var(--navy-700)">Mulai kegiatan</p>
+          </div>
+          <div class="border-l-2 pl-3 sm:pl-4" style="border-color:var(--navy-700)">
+            <p class="font-serif-display text-lg sm:text-2xl" style="color:var(--ink-900)">25 Jul</p>
+            <p class="text-xs sm:text-sm" style="color:var(--navy-700)">Berakhir 2026</p>
+          </div>
+          <div class="border-l-2 pl-3 sm:pl-4" style="border-color:var(--navy-700)">
+            <p class="font-serif-display text-lg sm:text-2xl" style="color:var(--ink-900)">Gratis</p>
+            <p class="text-xs sm:text-sm" style="color:var(--navy-700)">Untuk semua usia</p>
+          </div>
+        </div>
+      </div>
+      <div class="lg:col-span-4">
+        <div class="catalog-card p-5 sm:p-6 pl-7 sm:pl-9">
+          <div class="hole"></div><div class="hole bottom"></div>
+          <p class="font-mono text-[11px] tracking-widest uppercase mb-3" style="color:var(--navy-700)">Penyelenggara</p>
+          <p class="text-sm leading-relaxed" style="color:var(--ink-800)">Dinas Kebudayaan Provinsi Bali, berkolaborasi dengan Komunitas Aghumi sebagai pengampu program.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bg-paper-2 py-12 sm:py-16 lg:py-20" style="background:var(--paper-2)">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 grid lg:grid-cols-12 gap-10 lg:gap-12">
+      <div class="lg:col-span-6">
+        <p class="font-mono text-[11px] sm:text-xs tracking-[0.2em] sm:tracking-[0.25em] uppercase text-brass mb-3 sm:mb-4 eyebrow-dot">Tujuan Kegiatan</p>
+        <h2 class="font-serif-display text-xl sm:text-2xl lg:text-3xl mb-5 sm:mb-6" style="color:var(--ink-900)">Mengapa Beranda Pustaka hadir</h2>
+        <ul class="space-y-3 text-sm leading-relaxed" style="color:var(--ink-800)">
+          <li class="flex gap-3"><span class="font-mono text-xs mt-0.5" style="color:var(--navy-700)">01</span><span>Menghadirkan pengalaman literasi yang lebih terbuka dan menyenangkan.</span></li>
+          <li class="flex gap-3"><span class="font-mono text-xs mt-0.5" style="color:var(--navy-700)">02</span><span>Mengaktifkan perpustakaan sebagai ruang literasi dan interaksi publik.</span></li>
+          <li class="flex gap-3"><span class="font-mono text-xs mt-0.5" style="color:var(--navy-700)">03</span><span>Mendorong literasi sebagai ruang kolaborasi lewat buku, ruang publik, dan aktivitas komunitas.</span></li>
+          <li class="flex gap-3"><span class="font-mono text-xs mt-0.5" style="color:var(--navy-700)">04</span><span>Mendorong buku sebagai bagian dari gaya hidup kreatif dan edukatif.</span></li>
+          <li class="flex gap-3"><span class="font-mono text-xs mt-0.5" style="color:var(--navy-700)">05</span><span>Menjalin kerja sama dengan penerbit untuk mendukung gerakan literasi.</span></li>
+          <li class="flex gap-3"><span class="font-mono text-xs mt-0.5" style="color:var(--navy-700)">06</span><span>Menciptakan ruang pertemuan bagi komunitas, keluarga, generasi muda, dan pelaku kreatif.</span></li>
+        </ul>
+      </div>
+      <div class="lg:col-span-6">
+        <p class="font-mono text-[11px] sm:text-xs tracking-[0.2em] sm:tracking-[0.25em] uppercase text-brass mb-3 sm:mb-4 eyebrow-dot">Target Sasaran</p>
+        <h2 class="font-serif-display text-xl sm:text-2xl lg:text-3xl mb-5 sm:mb-6" style="color:var(--ink-900)">Untuk siapa kegiatan ini</h2>
+        <div class="space-y-3 text-sm leading-relaxed" style="color:var(--ink-800)">
+          <div class="catalog-card compact p-4 pl-6 sm:pl-7">
+            <div class="hole"></div>
+            <p class="font-semibold" style="color:var(--ink-900)">Pelajar &amp; mahasiswa</p>
+            <p>Mengembangkan minat baca, kreativitas, dan keterlibatan dalam kegiatan literasi interaktif.</p>
+          </div>
+          <div class="catalog-card compact p-4 pl-6 sm:pl-7">
+            <div class="hole"></div>
+            <p class="font-semibold" style="color:var(--ink-900)">Guru &amp; tenaga pendidik</p>
+            <p>Fasilitator yang membangun budaya literasi lewat pendekatan pembelajaran kontekstual.</p>
+          </div>
+          <div class="catalog-card compact p-4 pl-6 sm:pl-7">
+            <div class="hole"></div>
+            <p class="font-semibold" style="color:var(--ink-900)">Penulis, ilustrator &amp; pegiat buku</p>
+            <p>Bagian dari ekosistem literasi yang mendukung keberagaman bacaan.</p>
+          </div>
+          <div class="catalog-card compact p-4 pl-6 sm:pl-7">
+            <div class="hole"></div>
+            <p class="font-semibold" style="color:var(--ink-900)">Masyarakat umum</p>
+            <p>Peserta dan penggerak aktivitas literasi, sosial, dan ekonomi kreatif berbasis komunitas.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PAGE: JADWAL -->
+<section data-name="jadwal" class="page">
+  <div class="bg-ink text-paper py-14 sm:py-16 lg:py-20 ink-header">
+    <div class="constellation" aria-hidden="true">
+      <svg viewBox="0 0 1200 300" preserveAspectRatio="xMidYMid slice">
+        <line x1="1000" y1="40" x2="1110" y2="100"></line>
+        <line x1="1110" y1="100" x2="1070" y2="200"></line>
+        <line x1="1070" y1="200" x2="960" y2="220"></line>
+        <line x1="960" y1="220" x2="1000" y2="40"></line>
+        <circle class="dot-core" cx="1000" cy="40" r="3"></circle>
+        <circle cx="1110" cy="100" r="2.2"></circle>
+        <circle cx="1070" cy="200" r="2"></circle>
+        <circle class="dot-core" cx="960" cy="220" r="2.6"></circle>
+      </svg>
+    </div>
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <p class="font-mono text-[11px] sm:text-xs tracking-[0.2em] sm:tracking-[0.25em] uppercase text-brass mb-3 sm:mb-4 eyebrow-dot">Jadwal Kegiatan</p>
+      <h1 class="font-serif-display text-2xl sm:text-3xl lg:text-5xl mb-4" style="color:var(--brass-soft)">Waktu &amp; rangkaian acara</h1>
+      <p class="max-w-2xl text-[15px] sm:text-base" style="color:var(--brass-soft)">13 Juni – 25 Juli 2026, pukul 10.00 – 20.00 WITA, di Gedung Perpustakaan Widya Kusuma.</p>
+    </div>
+    <div class="spine h-2 w-full mt-10 sm:mt-12"></div>
+  </div>
+
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20">
+    <div class="grid lg:grid-cols-12 gap-6 lg:gap-8">
+      <div class="lg:col-span-4 catalog-card p-5 sm:p-6 pl-7 sm:pl-9">
+        <div class="hole"></div><div class="hole bottom"></div>
+        <p class="font-mono text-[11px] tracking-widest uppercase mb-4" style="color:var(--navy-700)">Waktu Pelaksanaan</p>
+        <div class="text-sm font-mono space-y-0">
+          <div class="due-row flex justify-between py-2.5"><span>Periode</span><span>13 Jun – 25 Jul</span></div>
+          <div class="due-row flex justify-between py-2.5"><span>Jam</span><span>10.00 – 20.00</span></div>
+          <div class="due-row flex justify-between py-2.5"><span>Tahun</span><span>2026</span></div>
+        </div>
+        <div class="stamp inline-block px-3 py-1 text-xs font-semibold mt-5">PKB XLVIII &amp; FSBJ VIII</div>
+      </div>
+
+      <div class="lg:col-span-8 catalog-card p-5 sm:p-6 pl-7 sm:pl-9">
+        <div class="hole"></div><div class="hole bottom"></div>
+        <p class="font-mono text-[11px] tracking-widest uppercase mb-4" style="color:var(--navy-700)">Rangkaian Acara</p>
+        <div class="space-y-0">
+          <div class="due-row agenda-row grid grid-cols-1 sm:grid-cols-12 py-3 gap-1 sm:gap-2">
+            <span class="sm:col-span-4 agenda-label text-[15px] sm:text-sm">Pameran Buku</span>
+            <span class="sm:col-span-8 agenda-desc text-[15px] sm:text-sm">Menghadirkan penerbit, penulis, pembaca, dan pelaku literasi.</span>
+          </div>
+          <div class="due-row agenda-row grid grid-cols-1 sm:grid-cols-12 py-3 gap-1 sm:gap-2">
+            <span class="sm:col-span-4 agenda-label text-[15px] sm:text-sm">Diskusi Bersama Penulis</span>
+            <span class="sm:col-span-8 agenda-desc text-[15px] sm:text-sm">Membahas proses kreatif &amp; pengalaman menulis karya.</span>
+          </div>
+          <div class="due-row agenda-row grid grid-cols-1 sm:grid-cols-12 py-3 gap-1 sm:gap-2">
+            <span class="sm:col-span-4 agenda-label text-[15px] sm:text-sm">Diskusi Komunitas Literasi</span>
+            <span class="sm:col-span-8 agenda-desc text-[15px] sm:text-sm">Peran komunitas dalam meningkatkan minat baca &amp; strategi pemasaran buku.</span>
+          </div>
+          <div class="due-row agenda-row grid grid-cols-1 sm:grid-cols-12 py-3 gap-1 sm:gap-2">
+            <span class="sm:col-span-4 agenda-label text-[15px] sm:text-sm">Peluncuran Buku</span>
+            <span class="sm:col-span-8 agenda-desc text-[15px] sm:text-sm">Perayaan karya sekaligus ruang dialog antar penulis &amp; pegiat literasi.</span>
+          </div>
+          <div class="due-row agenda-row grid grid-cols-1 sm:grid-cols-12 py-3 gap-1 sm:gap-2">
+            <span class="sm:col-span-4 agenda-label text-[15px] sm:text-sm">Pameran Kartun</span>
+            <span class="sm:col-span-8 agenda-desc text-[15px] sm:text-sm">Karya kartun yang memadukan humor dan pesan sosial.</span>
+          </div>
+          <div class="due-row agenda-row grid grid-cols-1 sm:grid-cols-12 py-3 gap-1 sm:gap-2">
+            <span class="sm:col-span-4 agenda-label text-[15px] sm:text-sm">Aktivasi Perpustakaan &amp; Baca Tarot</span>
+            <span class="sm:col-span-8 agenda-desc text-[15px] sm:text-sm">Program partisipatif tambahan untuk menghidupkan ruang perpustakaan.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PAGE: BLOG -->
+<section data-name="blog" class="page">
+  <div class="bg-ink text-paper py-14 sm:py-16 lg:py-20 ink-header">
+    <div class="constellation" aria-hidden="true">
+      <svg viewBox="0 0 1200 300" preserveAspectRatio="xMidYMid slice">
+        <line x1="1000" y1="40" x2="1110" y2="100"></line>
+        <line x1="1110" y1="100" x2="1070" y2="200"></line>
+        <line x1="1070" y1="200" x2="960" y2="220"></line>
+        <line x1="960" y1="220" x2="1000" y2="40"></line>
+        <circle class="dot-core" cx="1000" cy="40" r="3"></circle>
+        <circle cx="1110" cy="100" r="2.2"></circle>
+        <circle cx="1070" cy="200" r="2"></circle>
+        <circle class="dot-core" cx="960" cy="220" r="2.6"></circle>
+      </svg>
+    </div>
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <p class="font-mono text-[11px] sm:text-xs tracking-[0.2em] sm:tracking-[0.25em] uppercase text-brass mb-3 sm:mb-4 eyebrow-dot">Kabar &amp; Blog</p>
+      <h1 class="font-serif-display text-2xl sm:text-3xl lg:text-5xl mb-4" style="color:var(--brass-soft)">Cerita dari Beranda Pustaka</h1>
+      <p class="max-w-2xl text-[15px] sm:text-base" style="color:var(--brass-soft)">Dokumentasi dan catatan dari rangkaian kegiatan di Beranda Pustaka.</p>
+    </div>
+    <div class="spine h-2 w-full mt-10 sm:mt-12"></div>
+  </div>
+
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20">
+    <div class="grid sm:grid-cols-2 md:grid-cols-3 gap-5 sm:gap-6">
+      <article class="catalog-card p-5 sm:p-6 pl-7 sm:pl-9 flex flex-col">
+        <div class="hole"></div><div class="hole bottom"></div>
+        <p class="font-mono text-[11px] tracking-widest uppercase mb-3" style="color:var(--navy-700)">13 Jun 2026 · Pembukaan</p>
+        <h3 class="font-serif-display text-lg sm:text-xl mb-2" style="color:var(--ink-900)">Beranda Pustaka Resmi Dibuka di Widya Kusuma</h3>
+        <p class="text-sm leading-relaxed flex-1" style="color:var(--ink-800)">
+          Program literasi bagian dari Festival Seni Bali Jani VIII ini mulai menyapa pengunjung dan aktivasi ruang perpustakaan.
+        </p>
+        <a href="https://www.instagram.com/reel/DZmcZOTsLaA/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA==" class="mt-4 text-sm font-semibold focus-ring" style="color:var(--navy-700)" target="_blank" rel="noopener">Lihat Selengkapnya →</a>
+      </article>
+
+      <article class="catalog-card p-5 sm:p-6 pl-7 sm:pl-9 flex flex-col">
+        <div class="hole"></div><div class="hole bottom"></div>
+        <p class="font-mono text-[11px] tracking-widest uppercase mb-3" style="color:var(--navy-700)">Koordinat baca</p>
+        <h3 class="font-serif-display text-lg sm:text-xl mb-2" style="color:var(--ink-900)">Beranda Pustaka mengadakan koordinat baca di beberapa titik di Kota Denpasar</h3>
+        <p class="text-sm leading-relaxed flex-1" style="color:var(--ink-800)">
+          Koordinat baca ini menjadi tempat memperoleh informasi tentang Beranda Pustaka dan pemberian voucher souvenir setiap Rp 100.000 pembelanjaan.
+        </p>
+        <a href="https://www.instagram.com/reel/DZtc0BiM4Jh/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA==" class="mt-4 text-sm font-semibold focus-ring" style="color:var(--navy-700)" target="_blank" rel="noopener">Lihat Selengkapnya →</a>
+      </article>
+
+      <article class="catalog-card p-5 sm:p-6 pl-7 sm:pl-9 flex flex-col sm:col-span-2 md:col-span-1">
+        <div class="hole"></div><div class="hole bottom"></div>
+        <p class="font-mono text-[11px] tracking-widest uppercase mb-3" style="color:var(--navy-700)">Pameran Kartun</p>
+        <h3 class="font-serif-display text-lg sm:text-xl mb-2" style="color:var(--ink-900)">Tarot Reading di Beranda Pustaka</h3>
+        <p class="text-sm leading-relaxed flex-1" style="color:var(--ink-800)">
+          Selain membaca buku, kita juga bisa membaca diri bersama tarot reader di Beranda Pustaka.
+        </p>
+        <a href="https://www.instagram.com/reel/DZ4OK40NmZe/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA==" class="mt-4 text-sm font-semibold focus-ring" style="color:var(--navy-700)" target="_blank" rel="noopener">Lihat Selengkapnya →</a>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- PAGE: TENTANG AGHUMI -->
+<section data-name="TentangAghumi" class="page">
+  <div class="bg-ink text-paper py-14 sm:py-16 lg:py-20 ink-header">
+    <div class="constellation" aria-hidden="true">
+      <svg viewBox="0 0 1200 300" preserveAspectRatio="xMidYMid slice">
+        <line x1="1000" y1="40" x2="1110" y2="100"></line>
+        <line x1="1110" y1="100" x2="1070" y2="200"></line>
+        <line x1="1070" y1="200" x2="960" y2="220"></line>
+        <line x1="960" y1="220" x2="1000" y2="40"></line>
+        <circle class="dot-core" cx="1000" cy="40" r="3"></circle>
+        <circle cx="1110" cy="100" r="2.2"></circle>
+        <circle cx="1070" cy="200" r="2"></circle>
+        <circle class="dot-core" cx="960" cy="220" r="2.6"></circle>
+      </svg>
+    </div>
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <p class="font-mono text-[11px] sm:text-xs tracking-[0.2em] sm:tracking-[0.25em] uppercase text-brass mb-3 sm:mb-4 eyebrow-dot">Pengampu</p>
+      <h1 class="font-serif-display text-2xl sm:text-3xl lg:text-5xl mb-4" style="color:var(--brass-soft)">Tentang Aghumi</h1>
+      <p class="max-w-2xl text-[15px] sm:text-base" style="color:var(--brass-soft)">Komunitas Seni Pertunjukan</p>
+    </div>
+    <div class="spine h-2 w-full mt-10 sm:mt-12"></div>
+  </div>
+
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20">
+    <div class="grid lg:grid-cols-12 gap-10 lg:gap-12">
+
+      <!-- TEKS PENJELASAN -->
+      <div class="lg:col-span-8 space-y-5 text-[15px] leading-relaxed order-2 lg:order-1" style="color:var(--ink-800)">
+
+        <h2 class="font-serif-display text-2xl sm:text-3xl lg:text-5xl mb-5 sm:mb-7" style="color:var(--ink-900)">
+          Tentang Aghumi
+        </h2>
+
+        <p>
+          <strong>Aghumi</strong> merupakan komunitas seni pertunjukan yang berbasis di Bali dan telah
+          berkarya sejak tahun 2018. Berangkat dari keyakinan bahwa seni mampu menjadi ruang
+          perjumpaan dan pemulihan, Aghumi mengeksplorasi tarot sebagai bahasa artistik untuk
+          membangun refleksi, membuka dialog, serta menghadirkan pengalaman kolektif melalui
+          berbagai karya pertunjukan.
+        </p>
+
+        <p>
+          Dalam setiap proses kreatifnya, Aghumi memadukan teater, sastra, musik, riset, dan
+          praktik partisipatoris untuk menciptakan karya yang tidak hanya dipentaskan, tetapi
+          juga mengajak audiens merasakan, mempertanyakan, dan menemukan makna bersama.
+          Seni dipandang sebagai medium penyembuhan, ruang berpikir kritis, sekaligus wadah
+          untuk menyuarakan pengalaman-pengalaman yang sering kali berada di pinggiran.
+        </p>
+
+        <p>
+          Sejak berdiri, Aghumi telah menghadirkan berbagai pertunjukan dan kolaborasi bersama
+          komunitas, institusi budaya, serta festival seni nasional seperti Festival Seni Bali
+          Jani, Indonesia Bertutur, Bali Spirit Festival, hingga Ubud Writers &amp; Readers Festival.
+          Melalui setiap karya dan kolaborasi, Aghumi terus berkomitmen menjadikan seni sebagai
+          ruang empati, edukasi, dan transformasi sosial.
+        </p>
+
+      </div>
+
+      <!-- LOGO AGHUMI -->
+      <div class="lg:col-span-4 order-1 lg:order-2">
+        <div class="lg:sticky lg:top-24">
+          <div class="p-6 sm:p-8 flex items-center justify-center">
+            <img
+              src="Logoaghumi.jpg"
+              alt="Logo Aghumi"
+              class="w-full max-w-[200px] sm:max-w-[260px] h-auto mx-auto"
+            >
+          </div>
+          <p class="font-mono text-[11px] tracking-widest uppercase mt-2 sm:mt-4 text-center" style="color:var(--navy-700)">
+            Komunitas Seni Pertunjukan
+          </p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- PAGE: LOKASI -->
+<section data-name="lokasi" class="page">
+  <div class="bg-ink text-paper py-14 sm:py-16 lg:py-20 ink-header">
+    <div class="constellation" aria-hidden="true">
+      <svg viewBox="0 0 1200 300" preserveAspectRatio="xMidYMid slice">
+        <line x1="1000" y1="40" x2="1110" y2="100"></line>
+        <line x1="1110" y1="100" x2="1070" y2="200"></line>
+        <line x1="1070" y1="200" x2="960" y2="220"></line>
+        <line x1="960" y1="220" x2="1000" y2="40"></line>
+        <circle class="dot-core" cx="1000" cy="40" r="3"></circle>
+        <circle cx="1110" cy="100" r="2.2"></circle>
+        <circle cx="1070" cy="200" r="2"></circle>
+        <circle class="dot-core" cx="960" cy="220" r="2.6"></circle>
+      </svg>
+    </div>
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <p class="font-mono text-[11px] sm:text-xs tracking-[0.2em] sm:tracking-[0.25em] uppercase text-brass mb-3 sm:mb-4 eyebrow-dot">Lokasi &amp; Kontak</p>
+      <h1 class="font-serif-display text-2xl sm:text-3xl lg:text-5xl mb-4" style="color:var(--brass-soft)">Datang dan baca bersama kami</h1>
+    </div>
+    <div class="spine h-2 w-full mt-10 sm:mt-12"></div>
+  </div>
+
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
+    <div class="grid lg:grid-cols-12 gap-8 lg:gap-12">
+      <div class="lg:col-span-5">
+        <p class="text-sm leading-relaxed mb-6" style="color:var(--ink-800)">
+          Gedung Perpustakaan Widya Kusuma berada di dalam kompleks Taman Werdhi Budaya (Art Centre) Denpasar — tepat di belakang Kalangan Ayodya, panggung tempat berlangsungnya pementasan Pesta Kesenian Bali. Dari gerbang masuk Art Centre, jalan terus sampai melihat Kalangan Ayodya (diatas pura di sebelah utara pintu keluar), lewati jembatan dan gedung perpustakaan ada persis di belakangnya.
+        </p>
+
+        <dl class="text-sm divide-y" style="border-color:var(--line); color:var(--ink-800)">
+          <div class="grid grid-cols-[88px_1fr] gap-3 py-3">
+            <dt class="font-mono text-[11px] tracking-widest uppercase pt-0.5" style="color:var(--navy-700)">Alamat</dt>
+            <dd>Gedung Perpustakaan Widya Kusuma, belakang Kalangan Ayodya, Taman Werdhi Budaya Art Centre, Denpasar, Bali</dd>
+          </div>
+          <div class="grid grid-cols-[88px_1fr] gap-3 py-3">
+            <dt class="font-mono text-[11px] tracking-widest uppercase pt-0.5" style="color:var(--navy-700)">Jam buka</dt>
+            <dd>13 Juni – 25 Juli 2026, setiap hari pukul 10.00 – 20.00 WITA</dd>
+          </div>
+          <div class="grid grid-cols-[88px_1fr] gap-3 py-3">
+            <dt class="font-mono text-[11px] tracking-widest uppercase pt-0.5" style="color:var(--navy-700)">Kontak</dt>
+            <dd class="break-all">hello.berandapustaka@gmail.com</dd>
+          </div>
+        </dl>
+
+        <div class="stamp inline-block px-3 py-1 text-xs font-semibold mt-6">Belakang Kalangan Ayodya</div>
+      </div>
+      <div class="lg:col-span-7">
+        <div class="w-full h-64 sm:h-80 lg:h-full min-h-[280px] sm:min-h-[320px] border" style="border-color:var(--line)">
+          <iframe
+            class="w-full h-full"
+            style="filter:grayscale(0.3) contrast(1.05);"
+            src="https://www.google.com/maps?q=Taman%20Werdhi%20Budaya%20Art%20Centre%20Denpasar%20Bali&output=embed"
+            loading="lazy"
+            referrerpolicy="no-referrer-when-downgrade"
+            title="Peta lokasi Beranda Pustaka">
+          </iframe>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</section>
+
+
+</main>
+
+
+<!-- FOOTER -->
+<footer class="bg-ink text-paper pt-12 sm:pt-14 pb-8 ink-header">
+  <div class="constellation" aria-hidden="true">
+    <svg viewBox="0 0 1200 200" preserveAspectRatio="xMidYMid slice">
+      <line x1="80" y1="30" x2="160" y2="70"></line>
+      <line x1="160" y1="70" x2="130" y2="150"></line>
+      <line x1="130" y1="150" x2="40" y2="160"></line>
+      <line x1="40" y1="160" x2="80" y2="30"></line>
+      <circle class="dot-core" cx="80" cy="30" r="2.6"></circle>
+      <circle cx="160" cy="70" r="2"></circle>
+      <circle cx="130" cy="150" r="1.8"></circle>
+      <circle class="dot-core" cx="40" cy="160" r="2.2"></circle>
+    </svg>
+  </div>
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-8 sm:gap-10 pb-8 sm:pb-10 border-b" style="border-color:rgba(199,174,124,0.25)">
+      <div>
+        <div class="flex items-center gap-3 mb-3">
+          <span class="w-9 h-9 flex items-center justify-center bg-paper" style="color:var(--ink-900)">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M3 5.5C3 5.5 5.5 4 9 4.5C10.5 4.7 12 5.5 12 5.5V19C12 19 10.5 18.2 9 18C5.5 17.5 3 19 3 19V5.5Z" stroke="#1C3A57" stroke-width="1.3" stroke-linejoin="round"/><path d="M21 5.5C21 5.5 18.5 4 15 4.5C13.5 4.7 12 5.5 12 5.5V19C12 19 13.5 18.2 15 18C18.5 17.5 21 19 21 19V5.5Z" stroke="#1C3A57" stroke-width="1.3" stroke-linejoin="round"/></svg>
+          </span>
+          <span class="font-serif-display text-lg">Beranda Pustaka</span>
+        </div>
+        <p class="text-sm" style="color:var(--brass-soft)">Ruang temu buku dan budaya, bagian dari Festival Seni Bali Jani VIII &amp; PKB XLVIII 2026.</p>
+      </div>
+      <div>
+        <p class="font-mono text-[11px] tracking-widest uppercase mb-3 text-brass">Jelajahi</p>
+        <ul class="space-y-2 text-sm" style="color:var(--brass-soft)">
+        <li>
+  <a href="https://www.instagram.com/beranda_pustaka?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" 
+     target="_blank" rel="noopener"
+     class="hover:text-paper transition focus-ring">
+     Media Sosial Beranda Pustaka
+  </a>
+</li>
+          <li><a href="#" data-page="tentang" class="page-link hover:text-paper transition focus-ring">Tentang Kami</a></li>
+          <li><a href="#" data-page="jadwal" class="page-link hover:text-paper transition focus-ring">Jadwal Kegiatan</a></li>
+          <li><a href="#" data-page="blog" class="page-link hover:text-paper transition focus-ring">Kabar &amp; Blog</a></li>
+          <li><a href="#" data-page="TentangAghumi" class="page-link hover:text-paper transition focus-ring">Tentang Aghumi</a></li>
+          </ul>
+      </div>
+      <div>
+        <p class="font-mono text-[11px] tracking-widest uppercase mb-3 text-brass">Lokasi</p>
+        <p class="text-sm leading-relaxed" style="color:var(--brass-soft)">Gedung Perpustakaan Widya Kusuma<br>Taman Werdhi Budaya Art Centre, Denpasar, Bali</p>
+        <button data-page="lokasi" class="page-link mt-2 text-sm font-semibold text-paper hover:opacity-80 transition focus-ring">Lihat peta →</button>
+      </div>
+      <div>
+  <p class="font-mono text-[11px] tracking-widest uppercase mb-3 text-brass">Kontak</p>
+  <p class="text-sm leading-relaxed break-all" style="color:var(--brass-soft)">hello.berandapustaka@gmail.com</p>
+  <p class="text-sm mt-2" style="color:var(--brass-soft)">13 Jun – 25 Jul 2026<br>10.00 – 20.00 WITA</p>
+</div>
+    </div>
+    <div class="pt-6 flex flex-col sm:flex-row items-center justify-between gap-3">
+      <p class="font-serif-display text-sm">Beranda Pustaka</p>
+      <p class="text-xs text-center sm:text-left" style="color:var(--brass-soft)">&copy; 2026 Beranda Pustaka. Bagian dari Festival Seni Bali Jani VIII &amp; PKB XLVIII.</p>
+    </div>
+  </div>
+</footer>
+
+<script>
+  function showPage(name, pushHistory){
+    var current = document.querySelector('.page.active');
+    var next = document.querySelector('.page[data-name="' + name + '"]');
+    if (!next) return;
+
+    document.querySelectorAll('.nav-link[data-page]').forEach(function(l){
+      l.classList.toggle('active', l.dataset.page === name);
+    });
+    document.getElementById('mobileNav').classList.add('hidden');
+    document.getElementById('mobileNav').classList.remove('flex');
+
+    if (pushHistory !== false){
+      history.pushState({page:name}, '', '#' + name);
+    }
+
+    if (current && current !== next){
+      current.classList.remove('show');
+      setTimeout(function(){
+        current.classList.remove('active');
+        next.classList.add('active');
+        window.scrollTo({top:0, behavior:'instant'});
+        requestAnimationFrame(function(){ next.classList.add('show'); });
+      }, 180);
+    } else {
+      next.classList.add('active');
+      window.scrollTo({top:0, behavior:'instant'});
+      requestAnimationFrame(function(){ next.classList.add('show'); });
+    }
+  }
+
+  window.addEventListener('popstate', function(e){
+    var name = (e.state && e.state.page) || (location.hash || '#beranda').replace('#','');
+    showPage(name, false);
+  });
+
+  document.querySelectorAll('.page-link[data-page]').forEach(function(link){
+    link.addEventListener('click', function(e){
+      e.preventDefault();
+      showPage(link.dataset.page);
+    });
+  });
+
+  document.getElementById('menuBtn').addEventListener('click', function(){
+    var nav = document.getElementById('mobileNav');
+    var isHidden = nav.classList.contains('hidden');
+    nav.classList.toggle('hidden', !isHidden);
+    nav.classList.toggle('flex', isHidden);
+    this.setAttribute('aria-expanded', isHidden ? 'true' : 'false');
+  });
+
+  var initial = (location.hash || '#beranda').replace('#','');
+  var valid = ['beranda','tentang','jadwal','blog','TentangAghumi','lokasi'];
+  var startPage = valid.includes(initial) ? initial : 'beranda';
+  history.replaceState({page:startPage}, '', '#' + startPage);
+  showPage(startPage, false);
+</script>
+
+</body>
+</html>
