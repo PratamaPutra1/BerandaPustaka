@@ -175,6 +175,7 @@
   .day-nav-btn.is-empty{ opacity:.35; }
 
   .day-card.is-hidden{ display:none; }
+  #regularCard.is-hidden{ display:none; }
 
   .day-chip{
     font-family:'IBM Plex Mono', monospace;
@@ -202,11 +203,11 @@
 <body class="antialiased overflow-x-hidden">
 
 <!-- NAVBAR -->
-<header class="sticky top-0 z-50 bg-paper/95 backdrop-blur border-b" style="border-color:var(--line);">
+<header class="sticky top-0 z-50 bg-paper/95 backdrop-blur border-b relative" style="border-color:var(--line);">
   <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-14 sm:h-16 flex items-center justify-between">
    <a href="#" data-page="beranda" class="page-link flex items-center gap-2 sm:gap-3 focus-ring">
   <span class="w-14 h-14 sm:w-20 sm:h-20 flex items-center justify-center text-paper overflow-hidden rounded-sm shrink-0">
-    <img src="logobp-removebg-preview.png" alt="Logo Beranda Pustaka" class="w-full h-full object-contain p-1">
+    <img src="logobp.png" alt="Logo Beranda Pustaka" class="w-full h-full object-contain p-1">
   </span>
 </a>
 <nav class="hidden md:flex items-center gap-7 text-sm font-medium" style="color:var(--navy-700)">
@@ -221,7 +222,7 @@
   <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M3 6h18M3 12h18M3 18h18" stroke="#122A40" stroke-width="1.8" stroke-linecap="round"/></svg>
 </button>
   </div>
-  <nav id="mobileNav" class="hidden md:hidden flex-col px-4 sm:px-6 pb-4 gap-1 text-[15px] font-medium border-t" style="color:var(--navy-700); border-color:var(--line);">
+  <nav id="mobileNav" class="hidden md:hidden flex-col absolute left-0 right-0 top-full px-4 sm:px-6 pb-4 gap-1 text-[15px] font-medium border-t shadow-lg" style="color:var(--navy-700); border-color:var(--line); background:var(--paper); z-index:50;">
     <a href="#" data-page="beranda" class="page-link focus-ring py-2.5 border-b" style="border-color:var(--line)">Beranda</a>
     <a href="#" data-page="tentang" class="page-link focus-ring py-2.5 border-b" style="border-color:var(--line)">Tentang</a>
     <a href="#" data-page="jadwal" class="page-link focus-ring py-2.5 border-b" style="border-color:var(--line)">Jadwal</a>
@@ -520,7 +521,7 @@
 
   <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-12 lg:py-16">
 
-    <div class="catalog-card p-5 sm:p-6 pl-7 sm:pl-9 mb-8 lg:mb-10">
+    <div id="regularCard" class="catalog-card p-5 sm:p-6 pl-7 sm:pl-9 mb-8 lg:mb-10">
       <div class="hole"></div><div class="hole bottom"></div>
       <p class="font-mono text-[11px] tracking-widest uppercase mb-4" style="color:var(--navy-700)">Kegiatan Reguler · Tersedia Setiap Hari</p>
       <div class="grid sm:grid-cols-3 gap-x-6">
@@ -735,6 +736,33 @@
             title="Peta lokasi Beranda Pustaka">
           </iframe>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bg-paper-2 py-12 sm:py-16 lg:py-20" style="background:var(--paper-2)">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <p class="font-mono text-[11px] sm:text-xs tracking-[0.2em] sm:tracking-[0.25em] uppercase text-brass mb-3 sm:mb-4 eyebrow-dot">Panduan Rute</p>
+      <h2 class="font-serif-display text-xl sm:text-2xl lg:text-3xl mb-6 sm:mb-8" style="color:var(--ink-900)">Video jalan menuju Beranda Pustaka</h2>
+      <div class="grid sm:grid-cols-3 gap-5 sm:gap-6">
+        <a href="https://www.instagram.com/reel/DaSZ5Lws-po/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA==" target="_blank" rel="noopener" class="catalog-card p-5 pl-7 sm:pl-8 flex flex-col focus-ring hover:opacity-90 transition">
+          <div class="hole"></div><div class="hole bottom"></div>
+          <p class="font-mono text-[11px] tracking-widest uppercase mb-2" style="color:var(--navy-700)">Rute 01</p>
+          <h3 class="font-serif-display text-lg mb-2" style="color:var(--ink-900)">Dari Pintu Depan Art Centre</h3>
+          <span class="text-sm font-semibold mt-auto" style="color:var(--navy-700)">Tonton di Instagram →</span>
+        </a>
+        <a href="https://www.instagram.com/reel/DaZZJc3M1tV/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA==" target="_blank" rel="noopener" class="catalog-card p-5 pl-7 sm:pl-8 flex flex-col focus-ring hover:opacity-90 transition">
+          <div class="hole"></div><div class="hole bottom"></div>
+          <p class="font-mono text-[11px] tracking-widest uppercase mb-2" style="color:var(--navy-700)">Rute 02</p>
+          <h3 class="font-serif-display text-lg mb-2" style="color:var(--ink-900)">Dari Pintu Kedaton</h3>
+          <span class="text-sm font-semibold mt-auto" style="color:var(--navy-700)">Tonton di Instagram →</span>
+        </a>
+        <a href="https://www.instagram.com/reel/DaesqraMOXj/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA==" target="_blank" rel="noopener" class="catalog-card p-5 pl-7 sm:pl-8 flex flex-col focus-ring hover:opacity-90 transition">
+          <div class="hole"></div><div class="hole bottom"></div>
+          <p class="font-mono text-[11px] tracking-widest uppercase mb-2" style="color:var(--navy-700)">Rute 03</p>
+          <h3 class="font-serif-display text-lg mb-2" style="color:var(--ink-900)">Dari Pintu Kampus ISI Bali</h3>
+          <span class="text-sm font-semibold mt-auto" style="color:var(--navy-700)">Tonton di Instagram →</span>
+        </a>
       </div>
     </div>
   </div>
@@ -1032,8 +1060,10 @@ function renderDays(){
   const summaryActive = !(activeTag === 'all' && !query);
   const resultCountEl = document.getElementById('resultCount');
   const noResultsEl = document.getElementById('noResults');
+  const regularCardEl = document.getElementById('regularCard');
   if(resultCountEl) resultCountEl.textContent = summaryActive ? `${totalVisible} kegiatan · ${daysVisible} hari` : '';
   if(noResultsEl) noResultsEl.classList.toggle('show', summaryActive && totalVisible === 0);
+  if(regularCardEl) regularCardEl.classList.toggle('is-hidden', summaryActive);
 }
 
 function renderJadwal(){
