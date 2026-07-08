@@ -18,6 +18,7 @@
     --brass:#A6843F;
     --brass-soft:#C7AE7C;
     --line:#D8D2C0;
+    --ink-soft: rgba(11,27,43,0.55);
   }
   html{scroll-behavior:smooth;}
   body{ background:var(--paper); color:var(--ink-900); font-family:'Inter', sans-serif; }
@@ -112,6 +113,7 @@
     color:var(--ink-800);
     line-height:1.55;
   }
+  .agenda-desc em{ font-style:italic; }
 
   /* Penyesuaian agar nyaman di layar kecil */
   @media (max-width: 640px){
@@ -119,6 +121,82 @@
     .catalog-card .hole{ left:10px; width:6px; height:6px; }
     .catalog-card::before{ left:18px; }
   }
+
+  /* ==== Jadwal: filter bar & kartu harian ==== */
+  .filter-bar{
+    position: sticky; top: 56px; z-index: 20;
+    background: rgba(244,241,233,.92);
+    backdrop-filter: blur(6px);
+    border-bottom: 1px solid var(--line);
+  }
+  @media (min-width:640px){ .filter-bar{ top:64px; } }
+
+  .tag-pill{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: .03em;
+    padding: 6px 12px;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    color: var(--navy-700);
+    background: transparent;
+    white-space: nowrap;
+    transition: background .15s ease, color .15s ease, border-color .15s ease;
+    cursor: pointer;
+  }
+  .tag-pill:hover{ border-color: var(--brass); }
+  .tag-pill[data-active="true"]{
+    background: var(--ink-900); color: var(--brass-soft); border-color: var(--ink-900);
+  }
+
+  .search-input{
+    font-family:'Inter', sans-serif;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    color: var(--ink-900);
+  }
+  .search-input::placeholder{ color: var(--ink-soft); }
+  .search-input:focus{ outline: none; border-color: var(--brass); }
+
+  .day-nav-btn{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--navy-700);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 4px 8px;
+    white-space: nowrap;
+    transition: background .15s ease, color .15s ease;
+    cursor:pointer;
+    background: transparent;
+  }
+  .day-nav-btn:hover{ background: var(--paper-2); }
+  .day-nav-btn.is-empty{ opacity:.35; }
+
+  .day-card.is-hidden{ display:none; }
+
+  .day-chip{
+    font-family:'IBM Plex Mono', monospace;
+    background: var(--ink-900); color: var(--brass-soft);
+  }
+  .reg-badge{
+    font-family:'IBM Plex Mono', monospace;
+    color: var(--ink-soft);
+  }
+
+  .no-results{
+    display:none;
+    text-align:center;
+    padding: 2rem 1rem;
+    color: var(--ink-soft);
+    font-size: 14px;
+    font-family:'Inter', sans-serif;
+  }
+  .no-results.show{ display:block; }
+
+  #jadwalSection ::-webkit-scrollbar{ height:6px; }
+  #jadwalSection ::-webkit-scrollbar-thumb{ background: var(--line); border-radius: 999px; }
 </style>
 </head>
 <body class="antialiased overflow-x-hidden">
@@ -127,8 +205,8 @@
 <header class="sticky top-0 z-50 bg-paper/95 backdrop-blur border-b" style="border-color:var(--line);">
   <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-14 sm:h-16 flex items-center justify-between">
    <a href="#" data-page="beranda" class="page-link flex items-center gap-2 sm:gap-3 focus-ring">
-  <span class="w-12 h-12 sm:w-20 sm:h-20 flex items-center justify-center text-paper overflow-hidden rounded-sm shrink-0">
-    <img src="logobp-removebg-preview.png" alt="Logo Beranda Pustaka" class="w-full h-full object-contain p-1">
+  <span class="w-30 h-20 sm:w-20 sm:h-20 flex items-center justify-center text-paper overflow-hidden rounded-sm shrink-0">
+    <img src="logobp.png" alt="Logo Beranda Pustaka" class="w-full h-full object-contain p-1">
   </span>
 </a>
 <nav class="hidden md:flex items-center gap-7 text-sm font-medium" style="color:var(--navy-700)">
@@ -404,7 +482,7 @@
 </section>
 
 <!-- PAGE: JADWAL -->
-<section data-name="jadwal" class="page">
+<section data-name="jadwal" id="jadwalSection" class="page">
   <div class="bg-ink text-paper py-14 sm:py-16 lg:py-20 ink-header">
     <div class="constellation" aria-hidden="true">
       <svg viewBox="0 0 1200 300" preserveAspectRatio="xMidYMid slice">
@@ -421,55 +499,45 @@
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
       <p class="font-mono text-[11px] sm:text-xs tracking-[0.2em] sm:tracking-[0.25em] uppercase text-brass mb-3 sm:mb-4 eyebrow-dot">Jadwal Kegiatan</p>
       <h1 class="font-serif-display text-2xl sm:text-3xl lg:text-5xl mb-4" style="color:var(--brass-soft)">Waktu &amp; rangkaian acara</h1>
-      <p class="max-w-2xl text-[15px] sm:text-base" style="color:var(--brass-soft)">13 Juni – 25 Juli 2026, pukul 10.00 – 20.00 WITA, di Gedung Perpustakaan Widya Kusuma.</p>
+      <p class="max-w-2xl text-[15px] sm:text-base" style="color:var(--brass-soft)">11 – 25 Juli 2026, pukul 10.00 – 20.00 WITA, di Gedung Perpustakaan Widya Kusuma.</p>
     </div>
     <div class="spine h-2 w-full mt-10 sm:mt-12"></div>
   </div>
 
-  <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20">
-    <div class="grid lg:grid-cols-12 gap-6 lg:gap-8">
-      <div class="lg:col-span-4 catalog-card p-5 sm:p-6 pl-7 sm:pl-9">
-        <div class="hole"></div><div class="hole bottom"></div>
-        <p class="font-mono text-[11px] tracking-widest uppercase mb-4" style="color:var(--navy-700)">Waktu Pelaksanaan</p>
-        <div class="text-sm font-mono space-y-0">
-          <div class="due-row flex justify-between py-2.5"><span>Periode</span><span>13 Jun – 25 Jul</span></div>
-          <div class="due-row flex justify-between py-2.5"><span>Jam</span><span>10.00 – 20.00</span></div>
-          <div class="due-row flex justify-between py-2.5"><span>Tahun</span><span>2026</span></div>
-        </div>
-        <div class="stamp inline-block px-3 py-1 text-xs font-semibold mt-5">PKB XLVIII &amp; FSBJ VIII</div>
+  <div class="filter-bar">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4">
+      <div class="flex flex-col sm:flex-row sm:items-center gap-3">
+        <input id="searchInput" type="text" placeholder="Cari kegiatan, penulis, judul buku…"
+          class="search-input text-sm px-3 py-2 w-full sm:w-64 shrink-0" />
+        <div id="tagPills" class="flex gap-2 overflow-x-auto pb-1 sm:pb-0 min-w-0"></div>
       </div>
-
-      <div class="lg:col-span-8 catalog-card p-5 sm:p-6 pl-7 sm:pl-9">
-        <div class="hole"></div><div class="hole bottom"></div>
-        <p class="font-mono text-[11px] tracking-widest uppercase mb-4" style="color:var(--navy-700)">Rangkaian Acara</p>
-        <div class="space-y-0">
-          <div class="due-row agenda-row grid grid-cols-1 sm:grid-cols-12 py-3 gap-1 sm:gap-2">
-            <span class="sm:col-span-4 agenda-label text-[15px] sm:text-sm">Pameran Buku</span>
-            <span class="sm:col-span-8 agenda-desc text-[15px] sm:text-sm">Menghadirkan penerbit, penulis, pembaca, dan pelaku literasi.</span>
-          </div>
-          <div class="due-row agenda-row grid grid-cols-1 sm:grid-cols-12 py-3 gap-1 sm:gap-2">
-            <span class="sm:col-span-4 agenda-label text-[15px] sm:text-sm">Diskusi Bersama Penulis</span>
-            <span class="sm:col-span-8 agenda-desc text-[15px] sm:text-sm">Membahas proses kreatif &amp; pengalaman menulis karya.</span>
-          </div>
-          <div class="due-row agenda-row grid grid-cols-1 sm:grid-cols-12 py-3 gap-1 sm:gap-2">
-            <span class="sm:col-span-4 agenda-label text-[15px] sm:text-sm">Diskusi Komunitas Literasi</span>
-            <span class="sm:col-span-8 agenda-desc text-[15px] sm:text-sm">Peran komunitas dalam meningkatkan minat baca &amp; strategi pemasaran buku.</span>
-          </div>
-          <div class="due-row agenda-row grid grid-cols-1 sm:grid-cols-12 py-3 gap-1 sm:gap-2">
-            <span class="sm:col-span-4 agenda-label text-[15px] sm:text-sm">Peluncuran Buku</span>
-            <span class="sm:col-span-8 agenda-desc text-[15px] sm:text-sm">Perayaan karya sekaligus ruang dialog antar penulis &amp; pegiat literasi.</span>
-          </div>
-          <div class="due-row agenda-row grid grid-cols-1 sm:grid-cols-12 py-3 gap-1 sm:gap-2">
-            <span class="sm:col-span-4 agenda-label text-[15px] sm:text-sm">Pameran Kartun</span>
-            <span class="sm:col-span-8 agenda-desc text-[15px] sm:text-sm">Karya kartun yang memadukan humor dan pesan sosial.</span>
-          </div>
-          <div class="due-row agenda-row grid grid-cols-1 sm:grid-cols-12 py-3 gap-1 sm:gap-2">
-            <span class="sm:col-span-4 agenda-label text-[15px] sm:text-sm">Aktivasi Perpustakaan &amp; Baca Tarot</span>
-            <span class="sm:col-span-8 agenda-desc text-[15px] sm:text-sm">Program partisipatif tambahan untuk menghidupkan ruang perpustakaan.</span>
-          </div>
-        </div>
+      <div class="flex items-center justify-between mt-3 gap-3">
+        <div id="dayNav" class="flex gap-1.5 overflow-x-auto min-w-0 flex-1"></div>
+        <span id="resultCount" class="font-mono text-[11px] whitespace-nowrap shrink-0" style="color:var(--ink-soft)"></span>
       </div>
     </div>
+  </div>
+
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-12 lg:py-16">
+
+    <div class="catalog-card p-5 sm:p-6 pl-7 sm:pl-9 mb-8 lg:mb-10">
+      <div class="hole"></div><div class="hole bottom"></div>
+      <p class="font-mono text-[11px] tracking-widest uppercase mb-4" style="color:var(--navy-700)">Kegiatan Reguler · Tersedia Setiap Hari</p>
+      <div class="grid sm:grid-cols-3 gap-x-6">
+        <div class="due-row flex items-center justify-between py-2.5"><span class="agenda-desc text-[14px]">Pameran Buku</span><span class="reg-badge text-[10px] uppercase tracking-wide">available</span></div>
+        <div class="due-row flex items-center justify-between py-2.5"><span class="agenda-desc text-[14px]">Bazar Buku</span><span class="reg-badge text-[10px] uppercase tracking-wide">available</span></div>
+        <div class="due-row flex items-center justify-between py-2.5"><span class="agenda-desc text-[14px]">Pameran Kartun</span><span class="reg-badge text-[10px] uppercase tracking-wide">available</span></div>
+        <div class="due-row flex items-center justify-between py-2.5"><span class="agenda-desc text-[14px]">Baca Tarot</span><span class="reg-badge text-[10px] uppercase tracking-wide">available</span></div>
+        <div class="due-row flex items-center justify-between py-2.5"><span class="agenda-desc text-[14px]">Koordinat Baca</span><span class="reg-badge text-[10px] uppercase tracking-wide">available</span></div>
+        <div class="due-row flex items-center justify-between py-2.5"><span class="agenda-desc text-[14px]">Jamming &amp; Open Mic</span><span class="reg-badge text-[10px] uppercase tracking-wide">available</span></div>
+      </div>
+      <p class="text-xs mt-4" style="color:var(--ink-800)">Berlangsung tiap hari, 10.00–20.00 Wita, di Perpustakaan — tidak diulang lagi di jadwal harian di bawah.</p>
+    </div>
+
+    <p class="font-mono text-[11px] tracking-widest uppercase mb-4" style="color:var(--navy-700)">Jadwal Harian · Program Tambahan</p>
+
+    <div id="dayList" class="space-y-5"></div>
+    <p id="noResults" class="no-results">Tidak ada kegiatan yang cocok. Coba ubah kata kunci atau kategori.</p>
   </div>
 </section>
 
@@ -792,6 +860,202 @@
   var startPage = valid.includes(initial) ? initial : 'beranda';
   history.replaceState({page:startPage}, '', '#' + startPage);
   showPage(startPage, false);
+</script>
+
+<!-- ==== SCRIPT JADWAL: data & filter ==== -->
+<script>
+const TAGS = {
+  komunitas:  { label: 'Komunitas' },
+  workshop:   { label: 'Workshop' },
+  diskusi:    { label: 'Diskusi Buku' },
+  pertunjukan:{ label: 'Pertunjukan' },
+  peluncuran: { label: 'Peluncuran' },
+  spesial:    { label: 'Spesial' },
+};
+
+const schedule = [
+  { date:'11', day:'Sabtu', label:'Pembukaan', events:[
+    { time:'10.00–20.00', tags:['komunitas'], title:'Kolaborasi Komunitas: Singgah Kata', desc:'<em>Ketikan Cerita di Beranda</em> — ruang mendengar, cerita diabadikan lewat mesin tik klasik.' },
+    { time:'16.00–18.00', tags:['workshop'], title:'Kolaborasi Komunitas: Aksaraya', desc:'<em>Mengalami Taman Budaya: Siasat Baru Menulis Cerita Bersama Gde Aryantha Soethama</em> · Halaman Perpustakaan.' },
+    { time:'18.00–21.00', tags:['spesial'], title:'Pembukaan Beranda Pustaka Festival Seni Bali Jani', desc:'<em>Akses Literasi, Harmoni Generasi</em>.' },
+  ]},
+  { date:'12', day:'Minggu', events:[
+    { time:'10.00–20.00', tags:['komunitas'], title:'Kolaborasi Komunitas: Singgah Kata', desc:'<em>Ketikan Cerita di Beranda</em>.' },
+    { time:'10.00–12.00', tags:['komunitas'], title:'Kolaborasi Komunitas: Panjang Umur Bajunya', desc:'<em>Pelan Bersama Semesta Mendukung</em>.' },
+    { time:'16.00–18.00', tags:['workshop'], title:'Workshop Membuat Zine Lipat Bersama Jahe Biru', desc:'<em>Arsip Diri dan Kenangan-Kenangan</em>.' },
+  ]},
+  { date:'13', day:'Senin', events:[
+    { time:'16.00–19.00', tags:['workshop'], title:'Workshop Tarot Beginner Level 1', desc:'<em>Tarot: Cara Lain Membaca</em> — dasar pembacaan tarot sebagai media refleksi diri &amp; pengembangan intuisi.' },
+  ]},
+  { date:'14', day:'Selasa', events:[] },
+  { date:'15', day:'Rabu', events:[
+    { time:'18.00–19.00', tags:['pertunjukan'], title:'Kolaborasi Komunitas: Teater Cakrawala', desc:'Dramatic Reading hasil Workshop KalamPuan: <em>Anak Pawang Merpati Kiremen</em> karya Dian Pancawati.' },
+  ]},
+  { date:'16', day:'Kamis', events:[] },
+  { date:'17', day:'Jumat', events:[
+    { time:'18.00–20.00', tags:['diskusi'], title:'Kolaborasi Komunitas: Maknadivina', desc:'<em>Baca Diri, Baca Kita: Sebuah Sesi Psikoterapi Reflektif</em>.' },
+  ]},
+  { date:'18', day:'Sabtu', events:[
+    { time:'10.00–20.00', tags:['komunitas','workshop'], title:'Melukis Topeng bersama Holy; Singgah Kata bersama Ihsan Jarot', desc:'<em>Ketikan Cerita di Beranda</em>.' },
+    { time:'16.00–18.00', tags:['komunitas'], title:'Kolaborasi Komunitas: Alumni Sanggar Minum Kopi', desc:'<em>Penyair dan Ketangguhan Kata</em>.' },
+  ]},
+  { date:'19', day:'Minggu', events:[
+    { time:'10.00–20.00', tags:['komunitas'], title:'Kolaborasi Komunitas: Singgah Kata', desc:'<em>Ketikan Cerita di Beranda</em>.' },
+    { time:'10.00–12.00', tags:['komunitas'], title:'Kolaborasi Komunitas: Rindu Dibaca', desc:'<em>Yang Kita Rawat di Tengah Distraksi</em>.' },
+    { time:'16.00–18.00', tags:['workshop'], title:'Kolaborasi Komunitas: Edi W', desc:'<em>Upcycle Charm: Workshop Kreasi Bag Charm dari Limbah Tekstil</em>.' },
+    { time:'18.00–20.00', tags:['komunitas'], title:'Kolaborasi Komunitas: Celiztial', desc:'<em>Membaca Bintang: Dari Rasi hingga Galaksi</em> · Halaman Perpustakaan.' },
+  ]},
+  { date:'20', day:'Senin', label:'Kalangan Ayodya', events:[
+    { time:'15.40–16.00', tags:['pertunjukan'], title:'Penampilan Pantoret: Teater Sangsaka', desc:'' },
+    { time:'16.00–17.00', tags:['diskusi'], title:'Diskusi Buku: Di Balik Tirai Operet karya Benny Dipo', desc:'Mengupas Proses Kreatif Penulisan Naskah Operet.' },
+    { time:'17.00–17.30', tags:['pertunjukan'], title:'Penampilan Musikalisasi Puisi: Teater Sangsaka', desc:'' },
+    { time:'17.30–18.30', tags:['diskusi'], title:'Diskusi Buku: Kéné Kéto: Musik Pop Bali karya I Made Adnyana', desc:'Mengupas Dinamika dan Sejarah Industri Musik Populer di Bali.' },
+    { time:'18.30–19.35', tags:['diskusi'], title:'Diskusi Buku: Rahu karya Gus Martin', desc:'Membedah Ulang Mitos dan Menggugat Kebenaran Konvensional.' },
+    { time:'19.35–21.00', tags:['pertunjukan'], title:'Dramatic Reading hasil Workshop Sela Fokus', desc:'<em>Kisah Cinta dan Lain-Lain</em> karya Arifin C. Noer.' },
+  ]},
+  { date:'21', day:'Selasa', label:'Kalangan Ayodya', timeBlock:'16.00–20.00 · Kalangan Ayodya', events:[
+    { tags:['pertunjukan'], title:'Musikalisasi Puisi', desc:'Performer: Kelompok Sekali Pentas.' },
+    { tags:['diskusi'], title:'Diskusi Editorial Gramedia bersama Mirna Yulistianti', desc:'<em>Menembus Dunia Penerbitan Bersama Gramedia</em>.' },
+    { tags:['pertunjukan'], title:'Pembacaan Puisi Kembang', desc:'Performer: Wulan Saraswati.' },
+    { tags:['peluncuran'], title:'Peluncuran Antologi Puisi karya Oka Rusmini', desc:'<em>Kembang: Ekshumasi Sejarah bagi Perempuan yang Terlupakan</em>.' },
+    { tags:['pertunjukan'], title:'Pembacaan Nukilan Novel O', desc:'Performer: Pandya Wisista.' },
+    { tags:['diskusi'], title:'Diskusi Buku bersama Eka Kurniawan', desc:'<em>Hasrat Menjadi Manusia dalam O</em>.' },
+    { tags:['pertunjukan'], title:'Spoken Poetry', desc:'Performer: Julio Saputra.' },
+  ]},
+  { date:'22', day:'Rabu', events:[] },
+  { date:'23', day:'Kamis', events:[] },
+  { date:'24', day:'Jumat', events:[
+    { time:'16.00–18.00', tags:['diskusi'], title:'Kolaborasi Komunitas: YUP Kota Kita', desc:'<em>Pertanyaan yang Bergentayangan di Warga Urban</em> — diskusi dengan pantikan visual.' },
+    { time:'18.00–20.00', tags:['diskusi'], title:'Kolaborasi Komunitas: Lingkar Studi Batur', desc:'<em>Diskusi 100 Tahun Rarud Batur</em>.' },
+  ]},
+  { date:'25', day:'Sabtu', label:'Penutupan', events:[
+    { time:'10.00–20.00', tags:['komunitas'], title:'Kolaborasi Komunitas: Singgah Kata', desc:'<em>Ketikan Cerita di Beranda</em>.' },
+    { time:'16.00–18.00', tags:['komunitas'], title:'Kolaborasi Komunitas: Jardin Poetique', desc:'<em>Merangkai Bunga, Merayakan Kehidupan</em>.' },
+    { time:'18.00–20.00', tags:['spesial'], title:'Penutupan', desc:'<em>Sampai Jumpa di Halaman Berikutnya!</em>' },
+    { time:'20.00–22.00', tags:['pertunjukan'], title:'Epilog Beats', desc:'Performer: DJ PanPan.' },
+  ]},
+];
+
+let activeTag = 'all';
+let query = '';
+
+function renderPills(){
+  const wrap = document.getElementById('tagPills');
+  const all = document.createElement('button');
+  all.className = 'tag-pill'; all.dataset.tag = 'all'; all.textContent = 'Semua';
+  wrap.appendChild(all);
+  Object.entries(TAGS).forEach(([key, val])=>{
+    const btn = document.createElement('button');
+    btn.className = 'tag-pill'; btn.dataset.tag = key; btn.textContent = val.label;
+    wrap.appendChild(btn);
+  });
+  wrap.addEventListener('click', (e)=>{
+    const btn = e.target.closest('.tag-pill');
+    if(!btn) return;
+    activeTag = btn.dataset.tag;
+    render();
+  });
+}
+
+function renderDayNav(){
+  const wrap = document.getElementById('dayNav');
+  schedule.forEach(d=>{
+    const btn = document.createElement('button');
+    btn.className = 'day-nav-btn' + (d.events.length===0 ? ' is-empty' : '');
+    btn.textContent = d.date;
+    btn.addEventListener('click', ()=>{
+      const el = document.getElementById('day-'+d.date);
+      if(el) el.scrollIntoView({behavior:'smooth', block:'start'});
+    });
+    wrap.appendChild(btn);
+  });
+}
+
+function eventMatches(ev){
+  const tagOk = activeTag === 'all' || ev.tags.includes(activeTag);
+  if(!tagOk) return false;
+  if(!query) return true;
+  const hay = (ev.title + ' ' + ev.desc).toLowerCase();
+  return hay.includes(query);
+}
+
+function renderDays(){
+  const list = document.getElementById('dayList');
+  if(!list) return;
+  list.innerHTML = '';
+  let totalVisible = 0;
+  let daysVisible = 0;
+
+  schedule.forEach(d=>{
+    const visibleEvents = d.events.filter(eventMatches);
+    const showEmptyNote = d.events.length === 0 && activeTag === 'all' && !query;
+    const hasContent = visibleEvents.length > 0 || showEmptyNote;
+    if(hasContent) daysVisible++;
+    totalVisible += visibleEvents.length;
+
+    const card = document.createElement('div');
+    card.id = 'day-'+d.date;
+    card.className = 'catalog-card day-card p-5 sm:p-6 pl-7 sm:pl-9' + (hasContent ? '' : ' is-hidden');
+
+    let chips = `<span class="day-chip text-xs px-2.5 py-1 rounded-sm">${d.day}, ${d.date} Jul</span>`;
+    if(d.label) chips += `<span class="stamp text-[10px] px-2 py-0.5">${d.label}</span>`;
+
+    let body = '';
+    if(d.events.length === 0){
+      body = `<p class="text-sm italic" style="color:var(--ink-800)">Hanya kegiatan reguler harian.</p>`;
+    } else if(d.timeBlock){
+      body = `<p class="font-mono text-[12px] mb-2" style="color:var(--navy-700)">${d.timeBlock}</p><div>` +
+        visibleEvents.map(ev => `
+          <div class="due-row agenda-row py-2.5">
+            <span class="agenda-desc text-[15px] sm:text-sm">${ev.title}${ev.desc ? ' — ' + ev.desc : ''}</span>
+          </div>`).join('') +
+        `</div>`;
+    } else {
+      body = `<div>` + visibleEvents.map(ev => `
+          <div class="due-row agenda-row grid grid-cols-1 sm:grid-cols-12 py-3 gap-1 sm:gap-2">
+            <span class="sm:col-span-3 agenda-label text-[13px]">${ev.time}</span>
+            <span class="sm:col-span-9 agenda-desc text-[15px] sm:text-sm">${ev.title}${ev.desc ? ' — ' + ev.desc : ''}</span>
+          </div>`).join('') + `</div>`;
+    }
+
+    card.innerHTML = `
+      <div class="hole"></div><div class="hole bottom"></div>
+      <div class="flex flex-wrap items-center gap-2 mb-3">${chips}</div>
+      ${body}
+    `;
+    if(d.events.length > 0 && visibleEvents.length === 0){
+      card.classList.add('is-hidden');
+    }
+    list.appendChild(card);
+  });
+
+  const summaryActive = !(activeTag === 'all' && !query);
+  const resultCountEl = document.getElementById('resultCount');
+  const noResultsEl = document.getElementById('noResults');
+  if(resultCountEl) resultCountEl.textContent = summaryActive ? `${totalVisible} kegiatan · ${daysVisible} hari` : '';
+  if(noResultsEl) noResultsEl.classList.toggle('show', summaryActive && totalVisible === 0);
+}
+
+function renderJadwal(){
+  document.querySelectorAll('.tag-pill').forEach(p=>{
+    p.dataset.active = (p.dataset.tag === activeTag) ? 'true' : 'false';
+  });
+  renderDays();
+}
+
+const searchInputEl = document.getElementById('searchInput');
+if(searchInputEl){
+  searchInputEl.addEventListener('input', (e)=>{
+    query = e.target.value.trim().toLowerCase();
+    renderJadwal();
+  });
+}
+
+function render(){ renderJadwal(); }
+
+renderPills();
+renderDayNav();
+renderJadwal();
 </script>
 
 </body>
