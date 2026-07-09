@@ -68,6 +68,43 @@
   body.dark-mode .theme-toggle-icon-sun{ display:none; }
   body.dark-mode .theme-toggle-icon-moon{ display:block; }
 
+  /* ==== Hint hamburger (khusus mobile) ==== */
+  #menuBtn{ position:relative; }
+  .hamburger-pulse{
+    position:absolute; inset:0; border-radius:999px;
+    box-shadow:0 0 0 0 rgba(166,132,63,0.55);
+    animation:hamburgerPulse 1.6s ease-out infinite;
+    pointer-events:none;
+  }
+  @keyframes hamburgerPulse{
+    0%{ box-shadow:0 0 0 0 rgba(166,132,63,0.55); }
+    70%{ box-shadow:0 0 0 12px rgba(166,132,63,0); }
+    100%{ box-shadow:0 0 0 0 rgba(166,132,63,0); }
+  }
+  .hint-bubble{
+    position:absolute; top:calc(100% + 12px); right:0;
+    background:var(--ink-900); color:var(--paper);
+    font-family:'Inter', sans-serif; font-size:13px; line-height:1.45;
+    padding:10px 14px; border-radius:10px; max-width:210px;
+    box-shadow:0 10px 24px -8px rgba(0,0,0,0.35);
+    opacity:0; transform:translateY(-6px) scale(0.96);
+    transition:opacity .3s ease, transform .3s ease;
+    z-index:70; pointer-events:none;
+  }
+  .hint-bubble.show{ opacity:1; transform:translateY(0) scale(1); pointer-events:auto; }
+  .hint-bubble::before{
+    content:""; position:absolute; top:-6px; right:16px;
+    width:12px; height:12px; background:var(--ink-900);
+    transform:rotate(45deg); border-radius:2px;
+  }
+  .hint-bubble b{ color:var(--brass-soft); }
+  .hint-close{
+    position:absolute; top:4px; right:6px;
+    width:16px; height:16px; display:flex; align-items:center; justify-content:center;
+    color:rgba(244,241,233,0.55); cursor:pointer; font-size:14px; line-height:1;
+  }
+  .hint-close:hover{ color:var(--paper); }
+
   .catalog-card{
     background:var(--paper);
     border:1px solid var(--line);
@@ -247,7 +284,7 @@
   <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-14 sm:h-16 flex items-center justify-between">
    <a href="#" data-page="beranda" class="page-link flex items-center gap-2 sm:gap-3 focus-ring">
   <span class="w-14 h-14 sm:w-20 sm:h-20 flex items-center justify-center text-paper overflow-hidden rounded-sm shrink-0">
-    <img src="logobp.png" alt="Logo Beranda Pustaka" class="w-full h-full object-contain p-1">
+    <img src="logobp-removebg-preview.png" alt="Logo Beranda Pustaka" class="w-full h-full object-contain p-1">
   </span>
 </a>
 <nav class="hidden md:flex items-center gap-7 text-sm font-medium" style="color:var(--navy-700)">
@@ -268,7 +305,12 @@
     <svg class="theme-toggle-icon-moon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1111.2 3 7 7 0 0021 12.8z"></path></svg>
   </button>
   <button id="menuBtn" class="focus-ring p-2" aria-label="Buka menu" aria-expanded="false">
+    <span id="hamburgerPulse" class="hamburger-pulse"></span>
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M3 6h18M3 12h18M3 18h18" stroke="var(--ink-900)" stroke-width="1.8" stroke-linecap="round"/></svg>
+    <div id="hamburgerHint" class="hint-bubble">
+      <span class="hint-close" id="closeHamburgerHint">&times;</span>
+      Tap di sini untuk buka <b>Tentang, Jadwal, Blog</b>, dan halaman lainnya.
+    </div>
   </button>
 </div>
   </div>
@@ -281,19 +323,6 @@
     <a href="#" data-page="lokasi" class="page-link focus-ring py-2.5">Lokasi</a>
   </nav>
 </header>
-
-<!-- MODAL SELAMAT DATANG (khusus tampilan mobile) -->
-<div id="mobileWelcomeModal" class="hidden fixed inset-0 z-[60] items-center justify-center p-4" style="background:rgba(11,27,43,0.6);">
-  <div class="catalog-card p-6 pl-8 sm:pl-9 max-w-sm w-full">
-    <div class="hole"></div><div class="hole bottom"></div>
-    <p class="font-mono text-[11px] tracking-widest uppercase mb-2 eyebrow-dot" style="color:var(--navy-700)">Selamat Datang</p>
-    <h3 class="font-serif-display text-lg sm:text-xl mb-2" style="color:var(--ink-900)">Jelajahi Beranda Pustaka</h3>
-    <p class="text-sm leading-relaxed mb-5" style="color:var(--ink-800)">
-      Untuk mengakses halaman lain seperti Tentang, Jadwal, Kabar &amp; Blog, Tentang Aghumi, dan Lokasi, ketuk ikon menu (☰) di pojok kanan atas layar.
-    </p>
-    <button id="closeMobileWelcome" class="tag-pill w-full text-center py-2.5" type="button">Mengerti</button>
-  </div>
-</div>
 
 <main>
 
@@ -967,36 +996,49 @@
   if(themeBtnMobile) themeBtnMobile.addEventListener('click', toggleDarkMode);
 </script>
 
-<!-- ==== SCRIPT: Notifikasi Selamat Datang (khusus mobile) ==== -->
+<!-- ==== SCRIPT: Hint hamburger (khusus mobile) ==== -->
 <script>
   (function(){
     function isMobileView(){
       return window.matchMedia('(max-width: 767px)').matches;
     }
-    var modal = document.getElementById('mobileWelcomeModal');
-    var closeBtn = document.getElementById('closeMobileWelcome');
+    var hint = document.getElementById('hamburgerHint');
+    var pulse = document.getElementById('hamburgerPulse');
+    var closeHint = document.getElementById('closeHamburgerHint');
+    var menuBtn = document.getElementById('menuBtn');
+    var dismissed = false;
 
-    function openModal(){
-      if(!modal) return;
-      modal.classList.remove('hidden');
-      modal.classList.add('flex');
+    function showHint(){
+      if(dismissed || !hint) return;
+      hint.classList.add('show');
     }
-    function closeModal(){
-      if(!modal) return;
-      modal.classList.add('hidden');
-      modal.classList.remove('flex');
+    function hideHint(){
+      dismissed = true;
+      if(hint) hint.classList.remove('show');
+      if(pulse) pulse.style.display = 'none';
     }
 
-    if(closeBtn) closeBtn.addEventListener('click', closeModal);
-    if(modal){
-      modal.addEventListener('click', function(e){
-        if(e.target === modal) closeModal();
+    if(closeHint){
+      closeHint.addEventListener('click', function(e){
+        e.stopPropagation();
+        hideHint();
       });
     }
+    if(menuBtn){
+      menuBtn.addEventListener('click', hideHint);
+    }
+    document.addEventListener('click', function(e){
+      if(hint && hint.classList.contains('show') && !hint.contains(e.target) && e.target !== menuBtn){
+        hideHint();
+      }
+    });
 
     window.addEventListener('load', function(){
       if(isMobileView()){
-        setTimeout(openModal, 500);
+        setTimeout(showHint, 700);
+        setTimeout(hideHint, 6000);
+      } else if(pulse){
+        pulse.style.display = 'none';
       }
     });
   })();
